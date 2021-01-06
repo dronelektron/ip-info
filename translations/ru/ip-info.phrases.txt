@@ -1,0 +1,7 @@
+"Phrases"
+{
+    "Player connected"
+    {
+        "ru"    "Игрок {green}{1} {default}присоединился из {yellow}{2}{default}, {yellow}{3}"
+    }
+}
