@@ -10,6 +10,8 @@
 #define SUFFIX_COUNTRY "_country"
 #define SUFFIX_CITY "_city"
 
+#define CACHE_EXT ".txt"
+
 #define IP_MAX_LENGTH 24
 #define REQUEST_MAX_LENGTH 256
 #define BUFFER_MAX_SIZE 1024
@@ -18,7 +20,7 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "0.1.0",
+    version = "0.1.1",
     url = ""
 }
 
@@ -60,10 +62,10 @@ public void OnClientConnected(int client) {
     GetIp(client);
 
     if (IsCacheAvailable(client)) {
-        LogMessage("Cache found for the player \"%L\"", client);
+        LogMessage("Cache is found for the player \"%L\" (%s)", client, g_ip[client]);
         DisplayIpInfo(client);
     } else {
-        LogMessage("Cache is not found for the player \"%L\"", client);
+        LogMessage("Cache is not found for the player \"%L\" (%s)", client, g_ip[client]);
         GetCountry(client);
     }
 }
@@ -122,21 +124,47 @@ void SetDefaultOpt(Handle curl) {
 }
 
 void OnComplete(Handle curl, CURLcode code, int client) {
+    CloseHandle(curl);
+
     switch (g_state[client]) {
         case IpState_Country: {
-            LogMessage("Country name received for the player \"%L\"", client);
             CloseHandle(g_countryFile[client]);
-            GetCity(client);
+
+            if (code != CURLE_OK) {
+                char errorMsg[BUFFER_MAX_SIZE];
+                char countryFilePath[PLATFORM_MAX_PATH];
+
+                curl_easy_strerror(code, errorMsg, sizeof(errorMsg));
+
+                LogError("Country name is not received for the player \"%L\" (%s): [code: %d] %s", client, g_ip[client], code, errorMsg);
+                CPrintToChatAll("%s%t", PREFIX_COLORED, "Country name is not received", client);
+                GetCachePath(client, SUFFIX_COUNTRY, countryFilePath, sizeof(countryFilePath));
+                DeleteFile(countryFilePath);
+            } else {
+                LogMessage("Country name is received for the player \"%L\" (%s)", client, g_ip[client]);
+                GetCity(client);
+            }
         }
 
         case IpState_City: {
-            LogMessage("City name received for the player \"%L\"", client);
             CloseHandle(g_cityFile[client]);
-            DisplayIpInfo(client);
+
+            if (code != CURLE_OK) {
+                char errorMsg[BUFFER_MAX_SIZE];
+                char cityFilePath[PLATFORM_MAX_PATH];
+
+                curl_easy_strerror(code, errorMsg, sizeof(errorMsg));
+
+                LogError("City name is not received for the player \"%L\" (%s): [code: %d] %s", client, g_ip[client], code, errorMsg);
+                CPrintToChatAll("%s%t", PREFIX_COLORED, "City name is not received", client);
+                GetCachePath(client, SUFFIX_CITY, cityFilePath, sizeof(cityFilePath));
+                DeleteFile(cityFilePath);
+            } else {
+                LogMessage("City name is received for the player \"%L\" (%s)", client, g_ip[client]);
+                DisplayIpInfo(client);
+            }
         }
     }
-
-    CloseHandle(curl);
 }
 
 void DisplayIpInfo(int client) {
@@ -147,7 +175,7 @@ void DisplayIpInfo(int client) {
     ReadStringFromCache(client, SUFFIX_CITY, cityName, sizeof(cityName));
 
     CPrintToChatAll("%s%t", PREFIX_COLORED, "Player connected", client, countryName, cityName);
-    LogMessage("Player \"%L\" connected from %s, %s", client, countryName, cityName);
+    LogMessage("Player \"%L\" connected from %s, %s (%s)", client, countryName, cityName, g_ip[client]);
 }
 
 void ReadStringFromCache(int client, const char[] suffix, char[] buffer, int maxBufferSize) {
@@ -178,7 +206,7 @@ void GetCachePath(int client, const char[] suffix, char[] path, int maxPathLengt
     g_workingDirectory.GetString(workDir, sizeof(workDir));
     g_cacheDirectory.GetString(cacheDir, sizeof(cacheDir));
 
-    Format(path, maxPathLength, "%s/%s/%s%s", workDir, cacheDir, g_ip[client], suffix);
+    Format(path, maxPathLength, "%s/%s/%s%s%s", workDir, cacheDir, g_ip[client], suffix, CACHE_EXT);
 }
 
 bool IsCacheAvailable(int client) {

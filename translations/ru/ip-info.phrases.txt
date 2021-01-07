@@ -4,4 +4,14 @@
     {
         "ru"    "Игрок {green}{1} {default}присоединился из {yellow}{2}{default}, {yellow}{3}"
     }
+
+    "Country name is not received"
+    {
+        "ru"    "{red}Произошла ошибка при определении страны игрока {green}{1}"
+    }
+
+    "City name is not received"
+    {
+        "ru"    "{red}Произошла ошибка при определении города игрока {green}{1}"
+    }
 }
