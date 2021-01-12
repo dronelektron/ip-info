@@ -5,7 +5,7 @@
 
 #define PREFIX_COLORED "{orange}[IP info] "
 
-#define TEMPLATE_REQUEST "http://api.ipapi.com/api/%s?access_key=%s"
+#define TEMPLATE_REQUEST "http://api.ipapi.com/api/%s?access_key=%s&fields=%s,%s"
 
 #define FIELD_COUNTRY_NAME "country_name"
 #define FIELD_CITY_NAME "city"
@@ -24,7 +24,7 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "0.2.0",
+    version = "0.2.1",
     url = ""
 }
 
@@ -91,7 +91,7 @@ void GetIpInfo(int client) {
     g_apiKey.GetString(apiKey, sizeof(apiKey));
     g_cacheFile[client] = CreateCacheFile(client);
 
-    Format(requestUrl, sizeof(requestUrl), TEMPLATE_REQUEST, g_ip[client], apiKey);
+    Format(requestUrl, sizeof(requestUrl), TEMPLATE_REQUEST, g_ip[client], apiKey, FIELD_COUNTRY_NAME, FIELD_CITY_NAME);
 
     curl_easy_setopt_int_array(curl, g_curlOption, sizeof(g_curlOption));
     curl_easy_setopt_handle(curl, CURLOPT_WRITEDATA, g_cacheFile[client]);
