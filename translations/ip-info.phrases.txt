@@ -6,15 +6,9 @@
         "en"    "{default}Player {green}{1} {default}connected from {yellow}{2}{default}, {yellow}{3}"
     }
 
-    "Country name is not received"
+    "Data was not received"
     {
         "#format"   "{1:N}"
-        "en"    "{red}An error occurred when determining the country of the player {green}{1}"
-    }
-
-    "City name is not received"
-    {
-        "#format"   "{1:N}"
-        "en"    "{red}An error occurred when determining the city of the player {green}{1}"
+        "en"    "{red}An error occurred while retrieving data for player {green}{1}"
     }
 }
