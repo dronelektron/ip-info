@@ -3,7 +3,7 @@
     "Player connected"
     {
         "#format"   "{1:N},{2:s},{3:s}"
-        "en"    "Player {green}{1} {default}connected from {yellow}{2}{default}, {yellow}{3}"
+        "en"    "{default}Player {green}{1} {default}connected from {yellow}{2}{default}, {yellow}{3}"
     }
 
     "Country name is not received"

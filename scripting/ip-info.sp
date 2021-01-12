@@ -2,7 +2,7 @@
 #include <cURL>
 #include <morecolors>
 
-#define PREFIX_COLORED "{orange}[IP info] {default}"
+#define PREFIX_COLORED "{orange}[IP info] "
 
 #define TEMPLATE_IP_COUNTRY "https://ipapi.co/%s/country_name"
 #define TEMPLATE_IP_CITY "https://ipapi.co/%s/city"

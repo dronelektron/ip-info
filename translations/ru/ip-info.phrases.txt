@@ -2,7 +2,7 @@
 {
     "Player connected"
     {
-        "ru"    "Игрок {green}{1} {default}присоединился из {yellow}{2}{default}, {yellow}{3}"
+        "ru"    "{default}Игрок {green}{1} {default}присоединился из {yellow}{2}{default}, {yellow}{3}"
     }
 
     "Country name is not received"
