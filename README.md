@@ -17,8 +17,7 @@ Displays the following info about IP address:
 ### Console Variables
 
 * sm_ipinfo_working_directory - Working directory of the plugin [default: "ipinfo"]
-* sm_ipinfo_api_key - API key for the service [default: ""]
 
 ### Used API
 
-* https://ipapi.com/
+* https://ipwhois.io

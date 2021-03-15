@@ -31,11 +31,9 @@ static char g_ip[MAXPLAYERS + 1][IP_MAX_LENGTH];
 static Handle g_cacheFile[MAXPLAYERS + 1] = {null, ...};
 
 static ConVar g_workingDirectory = null;
-static ConVar g_apiKey = null;
 
 public void OnPluginStart() {
     g_workingDirectory = CreateConVar("sm_ipinfo_working_directory", "ipinfo", "Working directory of the plugin");
-    g_apiKey = CreateConVar("sm_ipinfo_api_key", "", "API key for the service");
 
     LoadTranslations("ip-info.phrases");
     AutoExecConfig(true, "ip-info");
@@ -75,12 +73,10 @@ Handle CreateCacheFile(int client) {
 void GetIpInfo(int client) {
     Handle curl = curl_easy_init();
     char requestUrl[REQUEST_MAX_LENGTH];
-    char apiKey[API_KEY_MAX_LENGTH];
 
-    g_apiKey.GetString(apiKey, sizeof(apiKey));
     g_cacheFile[client] = CreateCacheFile(client);
 
-    FormatRequest(g_ip[client], apiKey, requestUrl, sizeof(requestUrl));
+    FormatRequest(g_ip[client], requestUrl, sizeof(requestUrl));
 
     curl_easy_setopt_int_array(curl, g_curlOption, sizeof(g_curlOption));
     curl_easy_setopt_handle(curl, CURLOPT_WRITEDATA, g_cacheFile[client]);
@@ -174,16 +170,15 @@ bool IsCacheAvailable(int client) {
 
 // ==== Service ====
 
-#define SERVICE_NAME "ipapi.com"
-#define REQUEST_TEMPLATE "http://api.ipapi.com/api/%s?access_key=%s&fields=%s,%s"
+#define SERVICE_NAME "ipwhois.io"
+#define REQUEST_TEMPLATE "http://ipwhois.app/json/%s?objects=%s,%s"
 
-#define JSON_FIELD_COUNTRY "country_name"
+#define JSON_FIELD_COUNTRY "country"
 #define JSON_FIELD_CITY "city"
-#define JSON_FIELD_ERROR "error"
-#define JSON_FIELD_ERROR_INFO "info"
+#define JSON_FIELD_ERROR_MESSAGE "message"
 
-void FormatRequest(const char[] ip, const char[] apiKey, char[] request, int requestMaxSize) {
-    Format(request, requestMaxSize, REQUEST_TEMPLATE, ip, apiKey, JSON_FIELD_COUNTRY, JSON_FIELD_CITY);
+void FormatRequest(const char[] ip, char[] request, int requestMaxSize) {
+    Format(request, requestMaxSize, REQUEST_TEMPLATE, ip, JSON_FIELD_COUNTRY, JSON_FIELD_CITY);
 }
 
 void GetCacheDirectoryName(char[] cacheDirectoryName, int cacheDirectoryNameMaxSize) {
@@ -199,11 +194,11 @@ void GetJsonCityFieldName(char[] city, int cityMaxSize) {
 }
 
 void GetErrorMessage(JSON_Object obj, char[] errorMessage, int errorMessageMaxSize) {
-    JSON_Object errorObj = obj.GetObject(JSON_FIELD_ERROR);
+    JSON_Object errorObj = obj.GetObject(JSON_FIELD_ERROR_MESSAGE);
 
     if (errorObj == null) {
         strcopy(errorMessage, errorMessageMaxSize, "");
     } else {
-        errorObj.GetString(JSON_FIELD_ERROR_INFO, errorMessage, errorMessageMaxSize);
+        obj.GetString(JSON_FIELD_ERROR_MESSAGE, errorMessage, errorMessageMaxSize);
     }
 }
