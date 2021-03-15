@@ -5,26 +5,17 @@
 
 #define PREFIX_COLORED "{orange}[IP info] "
 
-#define TEMPLATE_REQUEST "http://api.ipapi.com/api/%s?access_key=%s&fields=%s,%s"
-
-#define FIELD_COUNTRY_NAME "country_name"
-#define FIELD_CITY_NAME "city"
-#define FIELD_ERROR "error"
-#define FIELD_ERROR_CODE "code"
-#define FIELD_ERROR_INFO "info"
-
 #define CACHE_EXT ".txt"
-
-#define IP_MAX_LENGTH 24
+#define IP_MAX_LENGTH 32
 #define REQUEST_MAX_LENGTH 256
-#define API_KEY_MAX_LENGTH 33
+#define API_KEY_MAX_LENGTH 64
 #define BUFFER_MAX_SIZE 1024
 
 public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "0.2.1",
+    version = "0.3.0",
     url = ""
 }
 
@@ -40,12 +31,10 @@ static char g_ip[MAXPLAYERS + 1][IP_MAX_LENGTH];
 static Handle g_cacheFile[MAXPLAYERS + 1] = {null, ...};
 
 static ConVar g_workingDirectory = null;
-static ConVar g_cacheDirectory = null;
 static ConVar g_apiKey = null;
 
 public void OnPluginStart() {
     g_workingDirectory = CreateConVar("sm_ipinfo_working_directory", "ipinfo", "Working directory of the plugin");
-    g_cacheDirectory = CreateConVar("sm_ipinfo_cache_directory", "cache", "Cache directory for country and city");
     g_apiKey = CreateConVar("sm_ipinfo_api_key", "", "API key for the service");
 
     LoadTranslations("ip-info.phrases");
@@ -91,7 +80,7 @@ void GetIpInfo(int client) {
     g_apiKey.GetString(apiKey, sizeof(apiKey));
     g_cacheFile[client] = CreateCacheFile(client);
 
-    Format(requestUrl, sizeof(requestUrl), TEMPLATE_REQUEST, g_ip[client], apiKey, FIELD_COUNTRY_NAME, FIELD_CITY_NAME);
+    FormatRequest(g_ip[client], apiKey, requestUrl, sizeof(requestUrl));
 
     curl_easy_setopt_int_array(curl, g_curlOption, sizeof(g_curlOption));
     curl_easy_setopt_handle(curl, CURLOPT_WRITEDATA, g_cacheFile[client]);
@@ -104,21 +93,20 @@ void OnComplete(Handle curl, CURLcode code, int client) {
     CloseHandle(g_cacheFile[client]);
 
     if (code != CURLE_OK) {
-        int errorCode = view_as<int>(code);
         char errorMessage[BUFFER_MAX_SIZE];
 
         curl_easy_strerror(code, errorMessage, sizeof(errorMessage));
 
-        DisplayError(client, errorCode, errorMessage);
+        DisplayError(client, errorMessage);
     } else {
         DisplayIpInfo(client);
     }
 }
 
-void DisplayError(int client, int code, const char[] message) {
+void DisplayError(int client, const char[] message) {
     char cacheFilePath[PLATFORM_MAX_PATH];
 
-    LogError("Data was not received for player \"%L\" (%s): [code: %d] %s", client, g_ip[client], code, message);
+    LogError("Data was not received for player \"%L\" (%s): %s", client, g_ip[client], message);
     CPrintToChatAll("%s%t", PREFIX_COLORED, "Data was not received", client);
     GetCachePath(client, cacheFilePath, sizeof(cacheFilePath));
     DeleteFile(cacheFilePath);
@@ -126,28 +114,30 @@ void DisplayError(int client, int code, const char[] message) {
 
 void DisplayIpInfo(int client) {
     char ipInfo[BUFFER_MAX_SIZE];
+    char errorMessage[BUFFER_MAX_SIZE];
 
     ReadStringFromCache(client, ipInfo, sizeof(ipInfo));
 
     JSON_Object obj = json_decode(ipInfo);
-    JSON_Object errorObj = obj.GetObject(FIELD_ERROR);
 
-    if (errorObj != null) {
-        int errorCode = errorObj.GetInt(FIELD_ERROR_CODE);
-        char errorInfo[BUFFER_MAX_SIZE];
+    GetErrorMessage(obj, errorMessage, sizeof(errorMessage));
 
-        errorObj.GetString(FIELD_ERROR_INFO, errorInfo, sizeof(errorInfo));
+    if (StrEqual(errorMessage, "")) {
+        char countryFieldName[BUFFER_MAX_SIZE];
+        char cityFiledName[BUFFER_MAX_SIZE];
+        char country[BUFFER_MAX_SIZE];
+        char city[BUFFER_MAX_SIZE];
 
-        DisplayError(client, errorCode, errorInfo);
+        GetJsonCountryFieldName(countryFieldName, sizeof(countryFieldName));
+        GetJsonCityFieldName(cityFiledName, sizeof(cityFiledName));
+
+        obj.GetString(countryFieldName, country, sizeof(country));
+        obj.GetString(cityFiledName, city, sizeof(city));
+
+        CPrintToChatAll("%s%t", PREFIX_COLORED, "Player connected", client, country, city);
+        LogMessage("Player \"%L\" connected from %s, %s (%s)", client, country, city, g_ip[client]);
     } else {
-        char countryName[BUFFER_MAX_SIZE];
-        char cityName[BUFFER_MAX_SIZE];
-
-        obj.GetString(FIELD_COUNTRY_NAME, countryName, sizeof(countryName));
-        obj.GetString(FIELD_CITY_NAME, cityName, sizeof(cityName));
-
-        CPrintToChatAll("%s%t", PREFIX_COLORED, "Player connected", client, countryName, cityName);
-        LogMessage("Player \"%L\" connected from %s, %s (%s)", client, countryName, cityName, g_ip[client]);
+        DisplayError(client, errorMessage);
     }
 
     json_cleanup_and_delete(obj);
@@ -169,8 +159,8 @@ void GetCachePath(int client, char[] path, int maxPathLength) {
     char cacheDir[PLATFORM_MAX_PATH];
 
     g_workingDirectory.GetString(workDir, sizeof(workDir));
-    g_cacheDirectory.GetString(cacheDir, sizeof(cacheDir));
 
+    GetCacheDirectoryName(cacheDir, sizeof(cacheDir));
     Format(path, maxPathLength, "%s/%s/%s%s", workDir, cacheDir, g_ip[client], CACHE_EXT);
 }
 
@@ -180,4 +170,40 @@ bool IsCacheAvailable(int client) {
     GetCachePath(client, cacheFilePath, sizeof(cacheFilePath));
 
     return FileExists(cacheFilePath);
+}
+
+// ==== Service ====
+
+#define SERVICE_NAME "ipapi.com"
+#define REQUEST_TEMPLATE "http://api.ipapi.com/api/%s?access_key=%s&fields=%s,%s"
+
+#define JSON_FIELD_COUNTRY "country_name"
+#define JSON_FIELD_CITY "city"
+#define JSON_FIELD_ERROR "error"
+#define JSON_FIELD_ERROR_INFO "info"
+
+void FormatRequest(const char[] ip, const char[] apiKey, char[] request, int requestMaxSize) {
+    Format(request, requestMaxSize, REQUEST_TEMPLATE, ip, apiKey, JSON_FIELD_COUNTRY, JSON_FIELD_CITY);
+}
+
+void GetCacheDirectoryName(char[] cacheDirectoryName, int cacheDirectoryNameMaxSize) {
+    strcopy(cacheDirectoryName, cacheDirectoryNameMaxSize, SERVICE_NAME);
+}
+
+void GetJsonCountryFieldName(char[] country, int countryMaxSize) {
+    strcopy(country, countryMaxSize, JSON_FIELD_COUNTRY);
+}
+
+void GetJsonCityFieldName(char[] city, int cityMaxSize) {
+    strcopy(city, cityMaxSize, JSON_FIELD_CITY);
+}
+
+void GetErrorMessage(JSON_Object obj, char[] errorMessage, int errorMessageMaxSize) {
+    JSON_Object errorObj = obj.GetObject(JSON_FIELD_ERROR);
+
+    if (errorObj == null) {
+        strcopy(errorMessage, errorMessageMaxSize, "");
+    } else {
+        errorObj.GetString(JSON_FIELD_ERROR_INFO, errorMessage, errorMessageMaxSize);
+    }
 }
