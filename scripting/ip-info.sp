@@ -11,11 +11,17 @@
 #define API_KEY_MAX_LENGTH 64
 #define BUFFER_MAX_SIZE 1024
 
+#define NO_ERROR_MESSAGE ""
+#define NO_IP_INFO ""
+#define NO_ITEM_INFO ""
+
+#define TARGET_ALL 0
+
 public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "0.3.0",
+    version = "0.4.0",
     url = ""
 }
 
@@ -28,6 +34,8 @@ static int g_curlOption[][2] = {
 }
 
 static char g_ip[MAXPLAYERS + 1][IP_MAX_LENGTH];
+static char g_country[MAXPLAYERS + 1][BUFFER_MAX_SIZE];
+static char g_city[MAXPLAYERS + 1][BUFFER_MAX_SIZE];
 static Handle g_cacheFile[MAXPLAYERS + 1] = {null, ...};
 
 static ConVar g_workingDirectory = null;
@@ -35,11 +43,15 @@ static ConVar g_workingDirectory = null;
 public void OnPluginStart() {
     g_workingDirectory = CreateConVar("sm_ipinfo_working_directory", "ipinfo", "Working directory of the plugin");
 
+    RegConsoleCmd("sm_ipinfo", Command_IpInfo);
+    LoadTranslations("common.phrases");
     LoadTranslations("ip-info.phrases");
     AutoExecConfig(true, "ip-info");
 }
 
 public void OnClientConnected(int client) {
+    ClearIpInfoForMenu(client);
+
     if (IsFakeClient(client)) {
         return;
     }
@@ -52,6 +64,64 @@ public void OnClientConnected(int client) {
     } else {
         LogMessage("Cache is not found for player \"%L\" (%s)", client, g_ip[client]);
         GetIpInfo(client);
+    }
+}
+
+public Action Command_IpInfo(int client, int args) {
+    if (args == 0) {
+        CreateIpInfoMenu(client, TARGET_ALL);
+    } else {
+        char arg[BUFFER_MAX_SIZE];
+
+        GetCmdArg(1, arg, sizeof(arg));
+
+        int target = FindTarget(client, arg);
+
+        if (target > 0) {
+            CreateIpInfoMenu(client, target);
+        }
+    }
+
+    return Plugin_Handled;
+}
+
+public int Handler_IpInfoMenu(Menu menu, MenuAction action, int param1, int param2) {
+    if (action == MenuAction_End) {
+        delete menu;
+    }
+
+    return 0;
+}
+
+void CreateIpInfoMenu(int client, int target) {
+    Menu menu = new Menu(Handler_IpInfoMenu);
+
+    menu.SetTitle("IP info");
+
+    AddIpInfoItemsToMenu(menu, target);
+
+    menu.Display(client, 20);
+}
+
+void AddIpInfoItemsToMenu(Menu menu, int target) {
+    char item[BUFFER_MAX_SIZE];
+
+    for (int i = 1; i <= MaxClients; i++) {
+        if (!IsClientInGame(i)) {
+            continue;
+        }
+
+        if (target != TARGET_ALL && i != target) {
+            continue;
+        }
+
+        if (StrEqual(g_country[i], NO_IP_INFO)) {
+            Format(item, sizeof(item), "%T", "Menu item no ip info", i, i, "Undefined");
+        } else {
+            Format(item, sizeof(item), "%T", "Menu item ip info", i, i, g_country[i], g_city[i]);
+        }
+
+        menu.AddItem(NO_ITEM_INFO, item);
     }
 }
 
@@ -118,7 +188,7 @@ void DisplayIpInfo(int client) {
 
     GetErrorMessage(obj, errorMessage, sizeof(errorMessage));
 
-    if (StrEqual(errorMessage, "")) {
+    if (StrEqual(errorMessage, NO_ERROR_MESSAGE)) {
         char countryFieldName[BUFFER_MAX_SIZE];
         char cityFiledName[BUFFER_MAX_SIZE];
         char country[BUFFER_MAX_SIZE];
@@ -131,6 +201,7 @@ void DisplayIpInfo(int client) {
         obj.GetString(cityFiledName, city, sizeof(city));
 
         CPrintToChatAll("%s%t", PREFIX_COLORED, "Player connected", client, country, city);
+        SaveIpInfoForMenu(client, country, city);
         LogMessage("Player \"%L\" connected from %s, %s (%s)", client, country, city, g_ip[client]);
     } else {
         DisplayError(client, errorMessage);
@@ -168,6 +239,18 @@ bool IsCacheAvailable(int client) {
     return FileExists(cacheFilePath);
 }
 
+void ClearIpInfoForMenu(int client) {
+    strcopy(g_country[client], BUFFER_MAX_SIZE, NO_IP_INFO);
+    strcopy(g_city[client], BUFFER_MAX_SIZE, NO_IP_INFO);
+}
+
+void SaveIpInfoForMenu(int client, const char[] country, const char[] city) {
+    strcopy(g_country[client], BUFFER_MAX_SIZE, country);
+    strcopy(g_city[client], BUFFER_MAX_SIZE, city);
+}
+
+// TODO: Menu
+
 // ==== Service ====
 
 #define SERVICE_NAME "ipwhois.io"
@@ -197,7 +280,7 @@ void GetErrorMessage(JSON_Object obj, char[] errorMessage, int errorMessageMaxSi
     JSON_Object errorObj = obj.GetObject(JSON_FIELD_ERROR_MESSAGE);
 
     if (errorObj == null) {
-        strcopy(errorMessage, errorMessageMaxSize, "");
+        strcopy(errorMessage, errorMessageMaxSize, NO_ERROR_MESSAGE);
     } else {
         obj.GetString(JSON_FIELD_ERROR_MESSAGE, errorMessage, errorMessageMaxSize);
     }

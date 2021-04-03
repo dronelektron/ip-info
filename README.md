@@ -18,6 +18,10 @@ Displays the following info about IP address:
 
 * sm_ipinfo_working_directory - Working directory of the plugin [default: "ipinfo"]
 
+### Console Commands
+
+* sm_ipinfo [#userid|name] - Show menu with IP info
+
 ### Used API
 
 * https://ipwhois.io

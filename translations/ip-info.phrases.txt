@@ -11,4 +11,21 @@
         "#format"   "{1:N}"
         "en"    "{red}An error occurred while retrieving data for player {green}{1}"
     }
+
+    "Menu item ip info"
+    {
+        "#format"   "{1:N},{2:s},{3:s}"
+        "en"    "{1} [{2}, {3}]"
+    }
+
+    "Menu item no ip info"
+    {
+        "#format"   "{1:N},{2:t}"
+        "en"    "{1} [{2}]"
+    }
+
+    "Undefined"
+    {
+        "en"    "Undefined"
+    }
 }
