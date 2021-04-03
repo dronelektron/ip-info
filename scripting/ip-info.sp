@@ -21,7 +21,7 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "0.4.0",
+    version = "0.4.1",
     url = ""
 }
 
@@ -121,7 +121,7 @@ void AddIpInfoItemsToMenu(Menu menu, int target) {
             Format(item, sizeof(item), "%T", "Menu item ip info", i, i, g_country[i], g_city[i]);
         }
 
-        menu.AddItem(NO_ITEM_INFO, item);
+        menu.AddItem(NO_ITEM_INFO, item, ITEMDRAW_DISABLED);
     }
 }
 
