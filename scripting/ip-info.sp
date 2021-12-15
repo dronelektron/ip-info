@@ -100,7 +100,7 @@ void CreateIpInfoMenu(int client, int target) {
 
     AddIpInfoItemsToMenu(menu, target);
 
-    menu.Display(client, 20);
+    menu.Display(client, MENU_TIME_FOREVER);
 }
 
 void AddIpInfoItemsToMenu(Menu menu, int target) {
