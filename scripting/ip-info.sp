@@ -249,8 +249,6 @@ void SaveIpInfoForMenu(int client, const char[] country, const char[] city) {
     strcopy(g_city[client], BUFFER_MAX_SIZE, city);
 }
 
-// TODO: Menu
-
 // ==== Service ====
 
 #define SERVICE_NAME "ipwhois.io"
