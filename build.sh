@@ -1,3 +1,6 @@
 #!/bin/bash
 
-spcomp scripting/ip-info.sp -i scripting/include -o plugins/ip-info.smx
+PLUGIN_NAME="ip-info"
+
+cd scripting
+spcomp $PLUGIN_NAME.sp -i include -o ../plugins/$PLUGIN_NAME.smx

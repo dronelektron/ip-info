@@ -10,6 +10,7 @@
 #define REQUEST_MAX_LENGTH 256
 #define API_KEY_MAX_LENGTH 64
 #define BUFFER_MAX_SIZE 1024
+#define SECONDS_IN_MINUTE 60
 
 #define NO_ERROR_MESSAGE ""
 #define NO_IP_INFO ""
@@ -21,7 +22,7 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "0.4.1",
+    version = "1.0.0",
     url = ""
 }
 
@@ -39,9 +40,11 @@ static char g_city[MAXPLAYERS + 1][BUFFER_MAX_SIZE];
 static Handle g_cacheFile[MAXPLAYERS + 1] = {null, ...};
 
 static ConVar g_workingDirectory = null;
+static ConVar g_maxCacheTime = null;
 
 public void OnPluginStart() {
     g_workingDirectory = CreateConVar("sm_ipinfo_working_directory", "ipinfo", "Working directory of the plugin");
+    g_maxCacheTime = CreateConVar("sm_ipinfo_max_cache_time", "1440", "Max cache time in minutes");
 
     RegConsoleCmd("sm_ipinfo", Command_IpInfo);
     LoadTranslations("common.phrases");
@@ -59,8 +62,13 @@ public void OnClientConnected(int client) {
     GetIp(client);
 
     if (IsCacheAvailable(client)) {
-        LogMessage("Cache is found for player \"%L\" (%s)", client, g_ip[client]);
-        DisplayIpInfo(client);
+        if (IsCacheExpired(client)) {
+            LogMessage("Cache is expired for player \"%L\" (%s)", client, g_ip[client]);
+            GetIpInfo(client);
+        } else {
+            LogMessage("Cache is found for player \"%L\" (%s)", client, g_ip[client]);
+            DisplayIpInfo(client);
+        }
     } else {
         LogMessage("Cache is not found for player \"%L\" (%s)", client, g_ip[client]);
         GetIpInfo(client);
@@ -100,7 +108,7 @@ void CreateIpInfoMenu(int client, int target) {
 
     AddIpInfoItemsToMenu(menu, target);
 
-    menu.Display(client, 20);
+    menu.Display(client, MENU_TIME_FOREVER);
 }
 
 void AddIpInfoItemsToMenu(Menu menu, int target) {
@@ -239,6 +247,18 @@ bool IsCacheAvailable(int client) {
     return FileExists(cacheFilePath);
 }
 
+bool IsCacheExpired(int client) {
+    char cacheFilePath[PLATFORM_MAX_PATH];
+
+    GetCachePath(client, cacheFilePath, sizeof(cacheFilePath));
+
+    int fileTime = GetFileTime(cacheFilePath, FileTime_LastChange);
+    int currentTime = GetTime();
+    int maxCacheTime = GetMaxCacheTime();
+
+    return currentTime - fileTime > maxCacheTime * SECONDS_IN_MINUTE;
+}
+
 void ClearIpInfoForMenu(int client) {
     strcopy(g_country[client], BUFFER_MAX_SIZE, NO_IP_INFO);
     strcopy(g_city[client], BUFFER_MAX_SIZE, NO_IP_INFO);
@@ -249,7 +269,9 @@ void SaveIpInfoForMenu(int client, const char[] country, const char[] city) {
     strcopy(g_city[client], BUFFER_MAX_SIZE, city);
 }
 
-// TODO: Menu
+int GetMaxCacheTime() {
+    return g_maxCacheTime.IntValue;
+}
 
 // ==== Service ====
 
