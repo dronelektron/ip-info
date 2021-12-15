@@ -17,6 +17,7 @@ Displays the following info about IP address:
 ### Console Variables
 
 * sm_ipinfo_working_directory - Working directory of the plugin [default: "ipinfo"]
+* sm_ipinfo_max_cache_time - Max cache time in minutes [default: "1440"]
 
 ### Console Commands
 
