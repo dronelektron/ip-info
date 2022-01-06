@@ -22,7 +22,7 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "1.0.0",
+    version = "1.0.1",
     url = ""
 }
 
@@ -115,7 +115,7 @@ void AddIpInfoItemsToMenu(Menu menu, int target) {
     char item[BUFFER_MAX_SIZE];
 
     for (int i = 1; i <= MaxClients; i++) {
-        if (!IsClientInGame(i)) {
+        if (!IsClientInGame(i) || IsFakeClient(i)) {
             continue;
         }
 
