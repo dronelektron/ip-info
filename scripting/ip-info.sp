@@ -115,7 +115,7 @@ void AddIpInfoItemsToMenu(Menu menu, int target) {
     char item[BUFFER_MAX_SIZE];
 
     for (int i = 1; i <= MaxClients; i++) {
-        if (!IsClientInGame(i)) {
+        if (!IsClientInGame(i) || IsFakeClient(i)) {
             continue;
         }
 
