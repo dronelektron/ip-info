@@ -11,7 +11,7 @@ Displays the following info about IP address:
 
 ### Installation
 
-* Download latest [release](https://github.com/Dron-elektron/ip-info/releases) (compiled for SourceMod 1.10)
+* Download latest [release](https://github.com/Dron-elektron/ip-info/releases) (compiled for SourceMod 1.11)
 * Extract "plugins" and "translations" folders to "addons/sourcemod" folder of your server
 
 ### Console Variables
