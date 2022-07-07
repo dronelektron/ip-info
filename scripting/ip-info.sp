@@ -22,9 +22,9 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country and city",
-    version = "1.0.1",
-    url = ""
-}
+    version = "1.0.2",
+    url = "https://github.com/dronelektron/ip-info"
+};
 
 static int g_curlOption[][2] = {
     {_:CURLOPT_NOSIGNAL, 1},
