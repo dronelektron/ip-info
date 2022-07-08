@@ -2,26 +2,36 @@
 {
     "Player connected"
     {
-        "ru"    "{default}Игрок {green}{1} {default}присоединился из {yellow}{2}{default}, {yellow}{3}"
+        "ru"    "{default}Игрок {green}{1} {default}присоединился из {yellow}{2}"
     }
 
-    "Data was not received"
+    "Country undefined"
     {
-        "ru"    "{red}Произошла ошибка при получении данных для игрока {green}{1}"
+        "ru"    "{red}Не удалось определить страну для игрока {green}{1} {default}({2})"
     }
 
-    "Menu item ip info"
+    "Bot"
     {
-        "ru"    "{1} [{2}, {3}]"
+        "ru"    "Бот"
+    }
+
+    "Local ip"
+    {
+        "ru"    "Локальный IP"
+    }
+
+    "Unknown reason"
+    {
+        "ru"    "Неизвестная причина"
     }
 
     "Menu item no ip info"
     {
-        "ru"    "{1} [{2}]"
+        "ru"    "{1} [***Не определена***]"
     }
 
-    "Undefined"
+    "Menu item ip info"
     {
-        "ru"    "Не определено"
+        "ru"    "{1} [{2}]"
     }
 }

@@ -2,30 +2,40 @@
 {
     "Player connected"
     {
-        "#format"   "{1:N},{2:s},{3:s}"
-        "en"    "{default}Player {green}{1} {default}connected from {yellow}{2}{default}, {yellow}{3}"
+        "#format"   "{1:N},{2:s}"
+        "en"    "{default}Player {green}{1} {default}connected from {yellow}{2}"
     }
 
-    "Data was not received"
+    "Country undefined"
     {
-        "#format"   "{1:N}"
-        "en"    "{red}An error occurred while retrieving data for player {green}{1}"
+        "#format"   "{1:N},{2:t}"
+        "en"    "{red}Failed to determine country for player {green}{1} {default}({2})"
     }
 
-    "Menu item ip info"
+    "Bot"
     {
-        "#format"   "{1:N},{2:s},{3:s}"
-        "en"    "{1} [{2}, {3}]"
+        "en"    "Bot"
+    }
+
+    "Local ip"
+    {
+        "en"    "Local IP"
+    }
+
+    "Unknown reason"
+    {
+        "en"    "Unknown reason"
     }
 
     "Menu item no ip info"
     {
-        "#format"   "{1:N},{2:t}"
-        "en"    "{1} [{2}]"
+        "#format"   "{1:N}"
+        "en"    "{1} [***Undefined***]"
     }
 
-    "Undefined"
+    "Menu item ip info"
     {
-        "en"    "Undefined"
+        "#format"   "{1:N},{2:s}"
+        "en"    "{1} [{2}]"
     }
 }
