@@ -29,6 +29,6 @@ public void OnPluginStart() {
     LoadTranslations("ip-info.phrases");
 }
 
-public void OnClientConnected(int client) {
+public void OnClientPostAdminCheck(int client) {
     UseCase_PrintIpInfo(client);
 }
