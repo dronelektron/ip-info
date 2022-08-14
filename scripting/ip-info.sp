@@ -20,7 +20,7 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country",
-    version = "1.0.3",
+    version = "1.0.4",
     url = "https://github.com/dronelektron/ip-info"
 };
 
