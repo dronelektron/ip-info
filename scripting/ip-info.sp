@@ -1,14 +1,9 @@
 #include <sourcemod>
 #include <geoip>
 
-#include "morecolors"
-
-#pragma semicolon 1
-#pragma newdecls required
-
-#include "ii/cache"
-#include "ii/menu"
-#include "ii/message"
+#include "ip-info/cache"
+#include "ip-info/menu"
+#include "ip-info/message"
 
 #include "modules/cache.sp"
 #include "modules/console-command.sp"
@@ -20,7 +15,7 @@ public Plugin myinfo = {
     name = "IP info",
     author = "Dron-elektron",
     description = "Displays info about IP address such as country",
-    version = "1.0.4",
+    version = "1.0.5",
     url = "https://github.com/dronelektron/ip-info"
 };
 

@@ -1,15 +1,20 @@
 "Phrases"
 {
+    "Prefix colored"
+    {
+        "en"    "FFA500[IP info] "
+    }
+
     "Player connected"
     {
         "#format"   "{1:N},{2:s}"
-        "en"    "{default}Player {green}{1} {default}connected from {yellow}{2}"
+        "en"    "Player 3EFF3E{1} connected from FFFF00{2}"
     }
 
     "Country undefined"
     {
         "#format"   "{1:N},{2:t}"
-        "en"    "{red}Failed to determine country for player {green}{1} {default}({2})"
+        "en"    "FF4040Failed to determine country for player 3EFF3E{1} ({2})"
     }
 
     "Bot"
