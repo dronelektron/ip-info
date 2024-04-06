@@ -3,8 +3,10 @@
 #endif
 #define _ii_message_included
 
+#define COLOR_DEFAULT "\x01"
+
 #define PREFIX "[IP info] "
-#define PREFIX_COLORED "{orange}[IP info] "
+#define PREFIX_COLORED "Prefix colored"
 
 #define BOT "Bot"
 #define LOCAL_IP "Local ip"

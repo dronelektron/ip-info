@@ -2,12 +2,12 @@
 {
     "Player connected"
     {
-        "ru"    "{default}Игрок {green}{1} {default}присоединился из {yellow}{2}"
+        "ru"    "Игрок 3EFF3E{1} присоединился из FFFF00{2}"
     }
 
     "Country undefined"
     {
-        "ru"    "{red}Не удалось определить страну для игрока {green}{1} {default}({2})"
+        "ru"    "FF4040Не удалось определить страну для игрока 3EFF3E{1} ({2})"
     }
 
     "Bot"

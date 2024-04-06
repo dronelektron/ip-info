@@ -1,11 +1,6 @@
 #include <sourcemod>
 #include <geoip>
 
-#include "morecolors"
-
-#pragma semicolon 1
-#pragma newdecls required
-
 #include "ii/cache"
 #include "ii/menu"
 #include "ii/message"
