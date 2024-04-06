@@ -1,9 +1,9 @@
 #include <sourcemod>
 #include <geoip>
 
-#include "ii/cache"
-#include "ii/menu"
-#include "ii/message"
+#include "ip-info/cache"
+#include "ip-info/menu"
+#include "ip-info/message"
 
 #include "modules/cache.sp"
 #include "modules/console-command.sp"

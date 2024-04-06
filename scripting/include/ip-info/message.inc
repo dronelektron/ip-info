@@ -1,7 +1,7 @@
-#if defined _ii_message_included
+#if defined _ip_info_message_included
  #endinput
 #endif
-#define _ii_message_included
+#define _ip_info_message_included
 
 #define COLOR_DEFAULT "\x01"
 
